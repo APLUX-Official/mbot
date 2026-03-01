@@ -1,0 +1,208 @@
+export https_proxy=http://192.168.31.35:7897 http_proxy=http://192.168.31.35:7897 all_proxy=socks5://192.168.31.35:7897
+
+
+rosrun tf2_ros static_transform_publisher 0 0 0 0 0 0 base_link laser_frame
+
+
+COLCON_MAKE_ARGS="-j4" colcon build
+
+#静态tf，雷达逆时针旋转90度
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 1.57 0.0 0.0 base_link laser
+
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 base_link laser
+
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 base_link laser_frame
+
+
+yd雷达z轴反转
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 1.0 0.0 0.0 0.0 base_link laser_frame
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 1.0 0.0 0.0 0.0 base_footprint laser_frame
+
+ros2 run tf2_ros static_transform_publisher 0.0 0.0 0.0 0.0 0.0 0.0 base_footprint laser_frame
+
+
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="lidar", MODE:="0666", SYMLINK+="sc_mini"
+
+
+aidlux@aidlux:~/ros2_ws/src/OrbbecSDK_ROS2/orbbec_camera/scripts$ cat install_udev_rules.sh 
+#!/bin/bash
+
+# Check if user is root/running with sudo
+if [ "$(whoami)" != root ]; then
+  echo Please run this script with sudo
+  exit
+fi
+
+CURR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  # Install UDEV rules for USB device
+  cp "${CURR_DIR}"/99-obsensor-libusb.rules /etc/udev/rules.d/99-obsensor-libusb.rules
+  echo "usb rules file install at /etc/udev/rules.d/99-obsensor-libusb.rules"
+fi
+echo "reload udev rules"
+udevadm control --reload-rules && udevadm trigger
+echo "udev rules reload done"
+echo "exit"
+aidlux@aidlux:~/ros2_ws/src/OrbbecSDK_ROS2/orbbec_camera/scripts$
+
+
+
+sudo mv /home/aidlux/ros2_ws/src/m1ct_d2/sc_mini.rules /etc/udev/rules.d/
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+这是ros2 launch ydlidar_ros2_driver ydlidar_launch.py
+aidlux@aidlux:~$ ros2 topic info --verbose /scan 
+/opt/ros/foxy/bin/ros2:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import load_entry_point
+Type: sensor_msgs/msg/LaserScan
+
+Publisher count: 1
+
+Node name: ydlidar_ros2_driver_node
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: PUBLISHER
+GID: 01.0f.e5.80.46.17.f6.20.01.00.00.00.00.00.12.03.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+Subscription count: 3
+
+Node name: rviz
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.1a.c1.b0.78.0d.e6.00.00.00.00.00.00.24.04.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_RELIABLE
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+Node name: rviz
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.e5.80.9d.17.84.e0.01.00.00.00.00.00.1c.04.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+Node name: slam_toolbox
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.e5.80.c8.18.14.63.02.00.00.00.00.00.23.04.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+aidlux@aidlux:~$ 
+
+
+
+
+这是ros2 run m1ct_d2 m1ct_d2
+aidlux@aidlux:~$ ros2 topic info --verbose /scan 
+/opt/ros/foxy/bin/ros2:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import load_entry_point
+Type: sensor_msgs/msg/LaserScan
+
+Publisher count: 1
+
+Node name: c1ct_d2
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: PUBLISHER
+GID: 01.0f.e5.80.df.1d.6d.2d.01.00.00.00.00.00.14.03.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+Subscription count: 2
+
+Node name: rviz
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.1a.c1.b0.78.0d.e6.00.00.00.00.00.00.24.04.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_RELIABLE
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+Node name: slam_toolbox
+Node namespace: /
+Topic type: sensor_msgs/msg/LaserScan
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.e5.80.96.1e.54.20.02.00.00.00.00.00.23.04.00.00.00.00.00.00.00.00
+QoS profile:
+  Reliability: RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+  Durability: RMW_QOS_POLICY_DURABILITY_VOLATILE
+  Lifespan: 2147483651294967295 nanoseconds
+  Deadline: 2147483651294967295 nanoseconds
+  Liveliness: RMW_QOS_POLICY_LIVELINESS_AUTOMATIC
+  Liveliness lease duration: 2147483651294967295 nanoseconds
+
+aidlux@aidlux:~$ 
+
+
+
+
+
