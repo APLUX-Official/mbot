@@ -1,0 +1,28 @@
+{
+    "pid_params": {
+        "kp": 150.0,
+        "ki": 300.0,
+        "kd": 2.0,
+        "kf": 30.0,
+        "out_min": -255,
+        "out_max": 255,
+        "integral_limit": 200,
+        "deadband": 15
+    },
+    "serial_ports": {
+        "motor_controller": {
+            "arduino_port": "/dev/ttyUSB0",
+            "left_port": "/dev/ttyUSB1",
+            "right_port": "/dev/ttyUSB2",
+            "baudrate": 115200
+        }
+    },
+    "target_speeds": {
+        "left_wheel": 0.5,
+        "right_wheel": 0.5
+    },
+    "robot_params": {
+        "wheel_base": 0.35,
+        "wheel_radius": 0.1
+    }
+}

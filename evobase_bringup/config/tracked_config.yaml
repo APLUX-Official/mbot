@@ -1,0 +1,43 @@
+# ==========================================================
+# 履带车 PID 控制器节点配置文件
+# ==========================================================
+
+# 这是此配置文件应用的目标节点名称。
+# 在 launch 文件中，请确保 Node 的 name 与此一致。
+tracked_cmd_node:
+  ros__parameters:
+    
+    # --- 1. 机器人物理参数 ---
+    robot_params:
+      # 物理轮距 (m)。左右履带中心线之间的实际测量距离。
+      wheel_base: 0.35
+      
+      # 驱动轮半径 (m)。
+      wheel_radius: 0.1
+
+      # 【【【新增】】】转向校准系数。
+      # 用于补偿原地转向或大角度转向时的履带打滑。
+      # 计算方法: (里程计报告的旋转角度) / (实际旋转角度)
+      # 示例: 报142度/实际90度 = 1.578
+      turning_correction_factor: 1.478
+
+    # --- 2. 串口配置 ---
+    serial_ports:
+      left: /dev/ttyUSB1
+      right: /dev/ttyUSB2
+      motor: /dev/ttyUSB0
+
+    # --- 3. PID 控制参数 ---
+    pid_params:
+      kp: 150.0
+      ki: 300.0
+      kd: 2.0
+      kf: 30.0
+      out_min: -255
+      out_max: 255
+      integral_limit: 200
+      deadband: 15
+    
+    # --- 4. 其他行为参数 ---
+    # cmd_vel 消息超时时间 (秒)。
+    cmd_vel_timeout: 0.5

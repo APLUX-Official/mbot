@@ -1,0 +1,98 @@
+#include <MsTimer2.h>
+
+#define IN1 6
+#define IN2 5
+#define ENCODER_A 2
+#define ENCODER_B 3
+
+volatile long encoder_count = 0;
+float target_pulses = 0;
+float pwm_accum = 0;
+float bias_prev = 0;
+
+const int MAX_PWM = 255;
+const float KP = 90.0;
+const float KI = 6.0;
+const float SCALE = 26.0;
+
+void READ_ENCODER_A() {
+  if (digitalRead(ENCODER_A) == HIGH) {
+    if (digitalRead(ENCODER_B) == LOW) encoder_count--;
+    else encoder_count++;
+  } else {
+    if (digitalRead(ENCODER_B) == LOW) encoder_count++;
+    else encoder_count--;
+  }
+}
+
+void READ_ENCODER_B() {
+  if (digitalRead(ENCODER_B) == LOW) {
+    if (digitalRead(ENCODER_A) == LOW) encoder_count--;
+    else encoder_count++;
+  } else {
+    if (digitalRead(ENCODER_A) == LOW) encoder_count++;
+    else encoder_count--;
+  }
+}
+
+void Set_Pwm(int pwm) {
+  pwm = constrain(pwm, -MAX_PWM, MAX_PWM);
+  if (pwm < 0) {
+    analogWrite(IN1, abs(pwm));
+    digitalWrite(IN2, LOW);
+  } else {
+    digitalWrite(IN1, LOW);
+    analogWrite(IN2, abs(pwm));
+  }
+}
+
+void control() {
+  noInterrupts();
+  float pulses = encoder_count;
+  encoder_count = 0;
+  interrupts();
+
+  float bias = target_pulses - pulses;
+  float delta_pwm = KP * (bias - bias_prev) / SCALE + KI * bias / SCALE;
+  pwm_accum += delta_pwm;
+  pwm_accum = constrain(pwm_accum, -MAX_PWM, MAX_PWM);
+  bias_prev = bias;
+
+  if (target_pulses == 0 && pulses == 0) {
+    pwm_accum = 0;
+    bias_prev = 0;
+  }
+
+  Set_Pwm((int)pwm_accum);
+
+  Serial.print("Target: ");
+  Serial.print(target_pulses, 2);
+  Serial.print("\tActual: ");
+  Serial.println(pulses, 2);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  analogWrite(IN1, 0);
+  analogWrite(IN2, 0);
+
+  pinMode(ENCODER_A, INPUT_PULLUP);
+  pinMode(ENCODER_B, INPUT_PULLUP);
+
+  MsTimer2::set(10, control);
+  MsTimer2::start();
+
+  attachInterrupt(digitalPinToInterrupt(ENCODER_A), READ_ENCODER_A, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), READ_ENCODER_B, CHANGE);
+}
+
+void loop() {
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    float val = cmd.toFloat();
+    if (val >= -100 && val <= 100) target_pulses = val;
+  }
+}

@@ -1,0 +1,35 @@
+robot_params:
+  wheel_base: 0.155   # m
+  wheel_radius: 0.0335 # m
+  encoder_cpr: 52    # 编码器每转的实际计数脉冲数 (物理脉冲数13 * 4 = 52，因为Arduino进行了四倍频)
+  gear_ratio: 30.0      # 电机减速比
+  min_start_pulses: 3 # 建议值，用于克服电机启动死区
+
+  # 轮子方向系数，1或-1，前进时编码器为正就设1，反之-1
+  left_wheel_dir: 1
+  right_wheel_dir: -1
+  # 【【【新增】】】转向校准系数。
+  # 用于补偿原地转向或大角度转向时的履带打滑。
+  # 计算方法: (里程计报告的旋转角度) / (实际旋转角度)
+  # 示例: 报142度/实际90度 = 1.578
+  turning_correction_factor: 1.363
+
+  # --- 新增：动态漂移补偿图 ---
+  # 定义一系列 [速度(m/s), 补偿值] 的对应关系。
+  # 程序会自动在这些点之间进行线性插值。
+  #
+  # !!! 正确逻辑 !!!
+  # 向右偏 = 右轮慢 -> 需要给右轮加速 -> 补偿值应为【正数】
+  # 向左偏 = 左轮慢(右轮快) -> 需要给右轮减速 -> 补偿值应为【负数】
+  #drift_compensation: 0.0125 # 旧的静态补偿值，将被弃用
+  #drift_compensation_map:
+  #  - [0.1, 0.0125]   # 低速补偿值 (您验证过的基准，用于修正向右偏)
+  #  - [0.5, 0.0150]   # 高速补偿值 (一个需要继续微调的初始猜测值，比低速补偿要大)
+
+serial_ports:
+  #left: /dev/ttyUSB1
+  #right: /dev/ttyUSB0
+  #left: /dev/drive_left
+  #right: /dev/drive_right
+  left: /dev/ttyACM0
+  right: /dev/ttyACM2

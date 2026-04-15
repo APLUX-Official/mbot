@@ -1,0 +1,20 @@
+# laser_filter_config.yaml
+
+# 在 ROS Foxy 中，参数通常直接写在节点名下
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter_chain:
+      - name: range
+        type: laser_filters/LaserScanRangeFilter
+        params:
+          lower_threshold: 0.20  # (单位: 米) 保留距离大于 0.2m 的点
+          upper_threshold: 50.0 # (单位: 米) 保留距离小于 30.0m 的点 (可以设置一个比你雷达最大量程还大的值)
+
+      # 你还可以串联其他过滤器，比如滤掉阴影点
+      # - name: shadows
+      #   type: laser_filters/ScanShadowsFilter
+      #   params:
+      #     min_angle: 10.0
+      #     max_angle: 170.0
+      #     neighbors: 1
+      #     window: 1

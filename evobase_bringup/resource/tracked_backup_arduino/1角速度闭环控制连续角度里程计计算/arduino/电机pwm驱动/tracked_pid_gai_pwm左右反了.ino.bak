@@ -1,0 +1,112 @@
+#define A1 5
+#define A2 4
+#define B1 7
+#define B2 8
+
+#define P1 6
+#define P2 9
+
+int lastPwmL = 0;
+int lastPwmR = 0;
+
+void setup() {
+  // 初始化引脚
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(P1, OUTPUT);
+  pinMode(B1, OUTPUT);
+  pinMode(B2, OUTPUT);
+  pinMode(P2, OUTPUT);
+
+  // 初始状态：停止
+  setMotors(0, 0);
+
+  // 初始化串口通信
+  Serial.begin(115200);
+  Serial.println("Ready to receive PWM: 'Lxxx', 'Rxxx', or 'pwm1,pwm2'");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    if (input.length() == 0) return;
+
+    // 独立左电机 Lxxx
+    if (input.startsWith("L") && input.length() > 1) {
+      int pwmL = input.substring(1).toInt();
+      pwmL = constrain(pwmL, -255, 255);
+      lastPwmL = pwmL;
+      setMotors(lastPwmL, lastPwmR);
+      Serial.print("Set Left Motor: ");
+      Serial.println(lastPwmL);
+      return;
+    }
+    // 独立右电机 Rxxx
+    if (input.startsWith("R") && input.length() > 1) {
+      int pwmR = input.substring(1).toInt();
+      pwmR = constrain(pwmR, -255, 255);
+      lastPwmR = pwmR;
+      setMotors(lastPwmL, lastPwmR);
+      Serial.print("Set Right Motor: ");
+      Serial.println(lastPwmR);
+      return;
+    }
+    // 兼容原有格式 pwm1,pwm2
+    int commaIndex = input.indexOf(',');
+    if (commaIndex != -1) {
+      int pwm1 = input.substring(0, commaIndex).toInt();
+      int pwm2 = input.substring(commaIndex + 1).toInt();
+      pwm1 = constrain(pwm1, -255, 255);
+      pwm2 = constrain(pwm2, -255, 255);
+      lastPwmL = pwm1;
+      lastPwmR = pwm2;
+      setMotors(lastPwmL, lastPwmR);
+      Serial.print("Set Motors: ");
+      Serial.print(lastPwmL);
+      Serial.print(", ");
+      Serial.println(lastPwmR);
+      return;
+    }
+    Serial.println("Invalid format! Use 'Lxxx', 'Rxxx', or 'pwm1,pwm2'");
+  }
+}
+
+// 设置两个电机速度
+void setMotors(int pwm1, int pwm2) {
+  // 电机1控制
+  if (pwm1 > 0) {
+    // 正转
+    digitalWrite(A1, HIGH);
+    digitalWrite(A2, LOW);
+    analogWrite(P1, pwm1);
+  } else if (pwm1 < 0) {
+    // 反转
+    digitalWrite(A1, LOW);
+    digitalWrite(A2, HIGH);
+    analogWrite(P1, -pwm1);  // 使用绝对值
+  } else {
+    // 停止
+    digitalWrite(A1, LOW);
+    digitalWrite(A2, LOW);
+    analogWrite(P1, 0);
+  }
+
+  // 电机2控制
+  if (pwm2 > 0) {
+    // 正转
+    digitalWrite(B1, HIGH);
+    digitalWrite(B2, LOW);
+    analogWrite(P2, pwm2);
+  } else if (pwm2 < 0) {
+    // 反转
+    digitalWrite(B1, LOW);
+    digitalWrite(B2, HIGH);
+    analogWrite(P2, -pwm2);  // 使用绝对值
+  } else {
+    // 停止
+    digitalWrite(B1, LOW);
+    digitalWrite(B2, LOW);
+    analogWrite(P2, 0);
+  }
+}

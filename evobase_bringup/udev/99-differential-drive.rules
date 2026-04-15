@@ -1,0 +1,23 @@
+# udev rules for two differential drive robot
+# 
+# This file maps CP2102 USB-to-Serial devices to fixed device names
+# based on their serial numbers for consistent device identification
+#
+# Installation:
+# sudo cp 99-differential-drive.rules /etc/udev/rules.d/
+# sudo udevadm control --reload-rules
+# sudo udevadm trigger
+#
+# Usage:
+# - Device with serial "left" will be mapped to /dev/drive_left
+# - Device with serial "right" will be mapped to /dev/drive_right
+# - Device with serial "lidar" will be mapped to /dev/drive_lidar
+
+# CP2102 USB to UART Bridge Controller for left drive motor
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="left", SYMLINK+="drive_left", MODE="0666", GROUP="dialout"
+
+# CP2102 USB to UART Bridge Controller for right drive motor  
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="right", SYMLINK+="drive_right", MODE="0666", GROUP="dialout"
+
+# CP2102 USB to UART Bridge Controller for lidar (optional)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="lidar", SYMLINK+="drive_lidar", MODE="0666", GROUP="dialout"
